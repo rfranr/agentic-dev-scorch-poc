@@ -15,7 +15,7 @@ Read this file first; inspect `scripts/analyze.sc` before running it. No other s
 | `scripts/analyze.sc` | Reusable bounded CPG-to-JSON exporter |
 | `scripts/fixture.js.txt` | Optional static validation fixture; copy as `input.js` into an isolated scratch target, never execute |
 
-Follow the Review workflow when conducting a maintainability investigation. Use the Run section to collect evidence during the Explore step. For a focused question, begin with the supplied hypothesis; for an independent review, explore first. For a focused question, begin with the supplied hypothesis. For an independent review, explore first and formulate hypotheses from the observed relationships.
+Follow the Review workflow when conducting a maintainability investigation. Use the Run section to collect evidence during the Explore step. For a focused question, begin with the supplied hypothesis. For an independent review, explore first and formulate hypotheses from the observed relationships.
 
 ## Prerequisites and safety
 
