@@ -1,3 +1,17 @@
+# Scorch — Agentic Development PoC
+
+This project is a proof of concept for [agentic-dev-template](https://github.com/rfranr/agentic-dev-template).
+
+The goal is to evaluate an agent-driven development workflow using a real, playable application.
+
+We are testing:
+- How effectively an agent translates requirements into working software.
+- Whether the template's quality checks and development tools provide useful feedback.
+- What the workflow fails to detect, particularly visual quality and user experience.
+- Which improvements should be incorporated back into the template.
+
+**This is an experiment, not a finished game.** Functional correctness, code quality, and visual quality are evaluated separately.
+
 # Scorch
 
 A playable local two-player artillery game with destructible terrain. Built with
