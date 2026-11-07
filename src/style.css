@@ -1,0 +1,127 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #edf4fa;
+  background: #101923;
+  color-scheme: dark;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+main {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 24px 20px 32px;
+}
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+h1 {
+  margin: 0;
+  font-size: 2.4rem;
+  letter-spacing: 0.05em;
+}
+.eyebrow {
+  color: #a9bfcc;
+  font-size: 0.75rem;
+  letter-spacing: 0.14em;
+  margin: 0 0 4px;
+}
+#status {
+  font-size: 1.15rem;
+  font-weight: 650;
+  min-height: 1.5em;
+}
+#status[data-phase='finished'] {
+  color: #ffdf8c;
+}
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border: 1px solid #607c8a;
+  border-radius: 8px;
+}
+form {
+  margin-top: 16px;
+}
+fieldset {
+  display: grid;
+  grid-template-columns: auto minmax(100px, 1fr) auto minmax(100px, 1fr) auto;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid #526775;
+  border-radius: 8px;
+  padding: 12px 16px 16px;
+}
+legend {
+  color: #b6cbd7;
+  padding: 0 8px;
+}
+label {
+  font-weight: 600;
+}
+output {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 400;
+  min-width: 75px;
+  margin-top: 4px;
+}
+input[type='range'] {
+  width: 100%;
+  accent-color: #9ce2ff;
+}
+button {
+  border: 1px solid #a5c1cf;
+  border-radius: 6px;
+  padding: 10px 20px;
+  background: #283d4d;
+  color: #fff;
+  font: inherit;
+  cursor: pointer;
+}
+#fire {
+  background: #8c3b1a;
+  border-color: #ffbe69;
+  font-weight: 700;
+}
+button:hover:not(:disabled) {
+  filter: brightness(1.25);
+}
+button:disabled,
+fieldset:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+:focus-visible {
+  outline: 3px solid #ffdf8c;
+  outline-offset: 4px;
+}
+#last-shot {
+  min-height: 1.5em;
+  color: #d8e5ee;
+}
+.help {
+  color: #a9bfcc;
+  line-height: 1.5;
+  font-size: 0.9rem;
+}
+
+@media (max-width: 700px) {
+  main {
+    padding: 16px 12px;
+  }
+  fieldset {
+    grid-template-columns: auto 1fr;
+  }
+  #fire {
+    grid-column: 1 / -1;
+  }
+}

@@ -3,13 +3,45 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="A local two-player artillery game with destructible terrain." />
     <title>Scorch</title>
   </head>
   <body>
     <main>
-      <h1>Scorch</h1>
-      <p>Two-player destructible-terrain artillery.</p>
-      <p role="status">Development shell ready. Gameplay is not implemented yet.</p>
+      <header>
+        <div>
+          <p class="eyebrow">LOCAL TWO-PLAYER ARTILLERY</p>
+          <h1>Scorch</h1>
+        </div>
+        <button id="restart" type="button">New match</button>
+      </header>
+      <p id="status" role="status" aria-live="polite" aria-label="Match status">Preparing the battlefield…</p>
+      <canvas
+        id="battlefield"
+        width="960"
+        height="540"
+        aria-label="Artillery battlefield: Player 1 is blue on the left; Player 2 is orange on the right."
+      >
+        This game requires Canvas 2D support.
+      </canvas>
+      <form id="aim-form">
+        <fieldset id="aim-controls">
+          <legend>Aim the active tank</legend>
+          <label for="angle">Angle <output id="angle-value" for="angle">45°</output></label>
+          <input id="angle" type="range" min="5" max="175" step="1" value="45" aria-describedby="aim-help" />
+          <label for="power">Power <output id="power-value" for="power">360 px/s</output></label>
+          <input id="power" type="range" min="80" max="520" step="5" value="360" />
+          <button id="fire" type="submit">Fire!</button>
+        </fieldset>
+      </form>
+      <p id="last-shot">Aim toward the other tank, then fire.</p>
+      <p id="aim-help" class="help">
+        Angle is measured above the direction toward your opponent: 45° arcs forward, 90° fires straight up. Adjust
+        sliders with the mouse or arrow keys, then press Fire. Aim close to a tank to destroy it. Shots leave craters;
+        tanks settle onto the remaining ground. Each player keeps their own aim.
+      </p>
+      <p class="help">One shot at a time. No wind. New match restarts at any time.</p>
+      <noscript><p>Enable JavaScript to play Scorch.</p></noscript>
     </main>
     <script type="module" src="/src/main.ts"></script>
   </body>

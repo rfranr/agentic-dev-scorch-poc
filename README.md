@@ -1,8 +1,9 @@
 # Scorch
 
-A browser-based, two-player artillery game with destructible terrain, planned in
-[TASK.md](TASK.md). **Current status: environment adaptation only.** The browser
-shell is not playable yet; aiming, firing, terrain, and game rules remain to be built.
+A playable local two-player artillery game with destructible terrain. Built with
+TypeScript, Canvas 2D, and Vite; no backend, framework, or runtime dependencies.
+See [TASK.md](TASK.md) for scope and [implementation notes](docs/implementation.md)
+for decisions, verification results, and limitations.
 
 ## Run locally
 
@@ -28,26 +29,35 @@ npm run preview
 
 ## Play
 
-There are no gameplay controls yet. The shell explicitly displays this status.
-The planned first playable version has local alternating turns, angle and power
-controls, firing, persistent craters, a winner announcement, and restart without
-reloading. See [TASK.md](TASK.md) for the acceptance criteria.
+1. Player 1 is blue on the left; Player 2 is orange on the right. The outlined
+   tank is active, and the status text identifies whose turn it is.
+2. Adjust **Angle** and **Power**, then press **Fire!** Sliders support mouse and
+   keyboard arrow keys. Angle is relative to the direction toward your opponent:
+   45° arcs forward, 90° shoots vertically, and angles above 90° shoot backward.
+3. Watch the shot, then pass control to the other player. Each tank remembers its
+   aim. There is no wind, and only one shot can be active.
+4. A direct hit or nearby blast destroys a tank. Craters persist; tanks settle
+   instantly onto remaining ground without falling damage. Self-destruction can
+   award the other player the win; mutual destruction is a draw.
+5. Press **New match** at any time, including during flight or after a win, to
+   generate new terrain and restart without reloading.
 
 ## Develop and verify
 
-Keep browser-specific code in `src/main.ts` and `src/browser/`; place future
-DOM-independent simulation code in `src/simulation/`. Browser globals are scoped
+Browser-specific code lives in `src/main.ts` and `src/browser/`;
+DOM-independent simulation code lives in `src/simulation/`. Browser globals are scoped
 in ESLint rather than enabled across the project. TypeScript currently includes
 DOM and Node types; Node unit tests must not import the browser entry point.
 
-Keep tests at `tests/*.test.ts` or `tests/*.test.mjs`, matching the existing test
-command. The initial shell smoke test checks HTML wiring, not gameplay or actual
-browser execution. Runtime-global regressions and structural-runner regressions
-remain in place. Add simulation behavior tests as the game is implemented.
+`npm test` runs core simulation tests and retained tooling regressions without a
+browser. `npm run test:browser` builds the app and runs real Chromium regressions
+against both development and production servers. It covers aiming, firing, a win,
+battlefield changes, turns, and restart, including restart during flight.
 
 | Command | Purpose |
 | --- | --- |
-| `npm test` | Node tests via `tsx`, including tooling regressions |
+| `npm test` | Simulation and tooling tests via `tsx` and Node |
+| `npm run test:browser` | Build and run Chromium development/production regressions |
 | `npm run format` / `npm run format:check` | Format / check source and tests |
 | `npm run lint` | Correctness, readability, and enforced complexity limits |
 | `npm run check` | Lint → tests → TypeScript and Vite build |
@@ -62,16 +72,20 @@ failed tests/builds, and failures to execute any report block completion.
 Informational findings must be reviewed and reported, but do not introduce new
 thresholds. Existing complexity limits and test-only exceptions are unchanged.
 
-Current coverage is deliberately retained: formatting and cognitive reports scan
-`src/` and `tests/`; lint also scans maintained `scripts/`. TypeScript and metrics
+Formatting covers code and CSS in `src/` and `tests/`, plus `index.html`.
+Cognitive reports scan code in `src/` and `tests/`; lint also scans maintained
+`scripts/`. TypeScript and metrics
 cover `src/` and `tests/` (tsmetrics skips `.mjs`). Dependency entry points and the
 structural runner include `src/` and top-level TypeScript tests; `.mjs` tooling
 regressions still run and are linted, but are not structural entry points. If paths
 change, update the relevant commands and report filters together.
 
-Playwright is installed for future real-browser regressions. Browser availability
-is separate from npm dependency installation; request approval before installing
-a missing browser. The current test command neither installs nor launches one.
+Playwright is already a development dependency. `test:browser` requires an
+installed Playwright Chromium browser; request approval before provisioning a
+missing browser (`npx playwright install chromium`). No check installs packages or
+browsers automatically. Browser tests are explicit, rather than part of `check`,
+so ordinary simulation/tooling checks do not require browser provisioning.
+`tests/browser-smoke.ts` is still covered by lint, type checking, and reports.
 Vite's private experiment paths and filesystem protections remain enabled.
 
 ## Development integrations and provenance
@@ -99,9 +113,9 @@ quality-tool reference, skill provenance, and contributing guidance as historica
 reference, not current Scorch fixture instructions. Its `contributing improvements`
 section describes proposing reusable changes without modifying the upstream
 template. [Historical validation](docs/validation.md) is not evidence that the
-current game meets its acceptance criteria. See the
-[environment adaptation report](docs/environment-adaptation.md) for executed
-checks and known limitations.
+current game meets its acceptance criteria. The
+[environment adaptation report](docs/environment-adaptation.md) records the
+pre-game setup; [implementation notes](docs/implementation.md) record game checks.
 
 Derived from `agentic-dev-template`, originally extracted from WorldGL. No license
 was supplied with WorldGL; no new license is asserted here. Resolve licensing

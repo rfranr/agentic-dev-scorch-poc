@@ -3,12 +3,16 @@ import assert from 'node:assert/strict';
 import { ESLint } from 'eslint';
 import { readFile } from 'node:fs/promises';
 
-test('Scorch browser shell declares its title, status, and TypeScript entry', async () => {
+test('Scorch page declares its title, live status, battlefield, controls, and entry', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
   assert.match(html, /<title>Scorch<\/title>/);
   assert.match(html, /role="status"/);
-  assert.match(html, /Gameplay is not implemented yet/);
+  assert.match(html, /id="battlefield"\s+width="960"\s+height="540"/);
+  assert.match(html, /id="angle"\s+type="range"/);
+  assert.match(html, /id="power"\s+type="range"/);
+  assert.match(html, /id="fire"\s+type="submit"/);
+  assert.match(html, /id="restart"\s+type="button"/);
   assert.match(html, /type="module" src="\/src\/main\.ts"/);
 });
 
