@@ -44,7 +44,7 @@ function statusText(game: Game): string {
   return `${player} fired — resolving shot…`;
 }
 
-function syncControls(controls: Controls, game: Game): void {
+function syncControls(controls: Controls, game: Game, outcome: string): void {
   const tank = game.tanks[game.activePlayer];
 
   controls.fieldset.disabled = game.phase !== 'aiming';
@@ -54,7 +54,8 @@ function syncControls(controls: Controls, game: Game): void {
   controls.powerValue.value = `${Math.round((tank.power / AIM_LIMITS.maxPower) * 100)}%`;
   controls.status.textContent = statusText(game);
   controls.status.dataset.phase = game.phase;
-  controls.lastShot.textContent = game.lastShot;
+  // The status owns the final result; shot feedback is only useful before it.
+  controls.lastShot.textContent = game.phase === 'finished' ? '' : outcome || game.lastShot;
 }
 
 export function startGame(): void {
@@ -99,15 +100,15 @@ export function startGame(): void {
       accumulatorSeconds -= STEP_SECONDS;
     }
 
+    updatePresentation(presentation, game);
     const tank = game.tanks[game.activePlayer];
-    const stateKey = `${game.phase}/${game.activePlayer}/${tank.angle}/${tank.power}`;
+    const stateKey = `${game.phase}/${game.activePlayer}/${tank.angle}/${tank.power}/${presentation.outcome}`;
 
     if (stateKey !== displayedState) {
-      syncControls(controls, game);
+      syncControls(controls, game, presentation.outcome);
       displayedState = stateKey;
     }
 
-    updatePresentation(presentation, game);
     renderGame(context, game, presentation);
     requestAnimationFrame(frame);
   };

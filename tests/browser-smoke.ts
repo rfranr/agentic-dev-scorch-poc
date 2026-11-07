@@ -35,6 +35,7 @@ async function verifyWinningShot(page: Page): Promise<void> {
   await waitForPhase(page, 'finished');
   assert.equal(await page.getByRole('status', { name: 'Match status' }).textContent(), 'Player 1 wins!');
   assert.equal(await page.locator('#fire').isDisabled(), true);
+  assert.equal(await page.locator('#last-shot').innerText(), '', 'final status replaces shot feedback');
   assert.notEqual(await canvasImage(page), initialImage, 'impact must change the battlefield');
 }
 

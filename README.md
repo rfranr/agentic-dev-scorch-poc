@@ -12,7 +12,7 @@ We are testing:
 
 **This is an experiment, not a finished game.** Functional correctness, code quality, and visual quality are evaluated separately.
 
-# Scorch
+## Scorch
 
 A playable local two-player artillery game with destructible terrain. Built with
 TypeScript, Canvas 2D, and Vite; no backend, framework, or runtime dependencies.

@@ -1,4 +1,4 @@
-import { AIM_LIMITS, BARREL_LENGTH, WORLD, muzzle, type Game, type Tank } from '../simulation/model';
+import { AIM_LIMITS, BARREL_LENGTH, WORLD, muzzle, type Tank } from '../simulation/model';
 
 export function drawSoil(context: CanvasRenderingContext2D): void {
   context.strokeStyle = '#a4ae7c25';
@@ -44,17 +44,4 @@ export function drawAim(context: CanvasRenderingContext2D, tank: Tank): void {
   context.lineTo(tank.x + directionX * cueLength, tank.y + directionY * cueLength);
   context.stroke();
   context.restore();
-}
-
-export function drawResult(context: CanvasRenderingContext2D, game: Game): void {
-  context.fillStyle = '#101923e8';
-  context.fillRect(100, 80, WORLD.width - 200, 100);
-  context.fillStyle = '#ffdf99';
-  context.textAlign = 'center';
-  context.font = 'bold 34px system-ui';
-  const result = game.winner === null ? 'DRAW' : `PLAYER ${game.winner + 1} WINS`;
-
-  context.fillText(result, WORLD.width / 2, 125);
-  context.font = '20px system-ui';
-  context.fillText('New match to play again', WORLD.width / 2, 158);
 }

@@ -58,9 +58,15 @@ export function drawShotHistory(context: CanvasRenderingContext2D, presentation:
   context.lineWidth = 3;
   context.beginPath();
 
-  for (const point of presentation.trail) {
-    context.lineTo(point.x, Math.max(6, point.y));
-  }
+  presentation.trail.forEach((point, index) => {
+    const y = Math.max(6, point.y);
+
+    if (index === 0) {
+      context.moveTo(point.x, y);
+    } else {
+      context.lineTo(point.x, y);
+    }
+  });
 
   context.stroke();
   drawImpact(context, presentation);
@@ -84,9 +90,4 @@ function drawImpact(context: CanvasRenderingContext2D, presentation: Presentatio
   context.font = 'bold 15px system-ui';
   context.textAlign = 'center';
   context.fillText('IMPACT', Math.max(42, Math.min(WORLD.width - 42, x)), y - 18);
-  context.fillStyle = '#101923e8';
-  context.fillRect(180, 18, WORLD.width - 360, 40);
-  context.fillStyle = '#fff1ce';
-  context.font = `bold ${Math.max(22, (12 * WORLD.width) / context.canvas.clientWidth)}px system-ui`;
-  context.fillText(presentation.outcome, WORLD.width / 2, 45);
 }

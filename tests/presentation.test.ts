@@ -1,8 +1,29 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { createPresentation, updatePresentation } from '../src/browser/presentation';
+import { createPresentation, drawShotHistory, updatePresentation } from '../src/browser/presentation';
 import { createGame, fire, stepGame } from '../src/simulation/game';
 import { STEP_SECONDS } from '../src/simulation/model';
+
+test('trail starts a new path at its first sample, including above-view shots', () => {
+  const presentation = createPresentation();
+  const commands: unknown[] = [];
+  const context = {
+    beginPath: () => commands.push('begin'),
+    moveTo: (x: number, y: number) => commands.push(['move', x, y]),
+    lineTo: (x: number, y: number) => commands.push(['line', x, y]),
+    stroke: () => commands.push('stroke'),
+  } as unknown as CanvasRenderingContext2D;
+
+  drawShotHistory(context, presentation);
+  assert.deepEqual(commands, ['begin', 'stroke']);
+  commands.length = 0;
+  presentation.trail = [
+    { x: 100, y: -20 },
+    { x: 110, y: 30 },
+  ];
+  drawShotHistory(context, presentation);
+  assert.deepEqual(commands, ['begin', ['move', 100, 6], ['line', 110, 30], 'stroke']);
+});
 
 test('shot history is bounded, survives impact, and resets on the next shot', () => {
   const game = createGame(() => 0.5);

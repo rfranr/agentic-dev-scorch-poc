@@ -1,7 +1,7 @@
 import { BLAST_RADIUS, EXPLOSION_SECONDS, TANK_RADIUS, WORLD, muzzle, type Game, type Tank } from '../simulation/model';
 
 import { drawShotHistory, type Presentation } from './presentation';
-import { drawAim, drawDistantHills, drawResult, drawSoil } from './scenery';
+import { drawAim, drawDistantHills, drawSoil } from './scenery';
 
 const PLAYER_COLORS = ['#65d5ff', '#ffbe69'];
 
@@ -148,8 +148,4 @@ export function renderGame(context: CanvasRenderingContext2D, game: Game, presen
 
   drawShot(context, game);
   drawExplosion(context, game);
-
-  if (game.phase === 'finished') {
-    drawResult(context, game);
-  }
 }
