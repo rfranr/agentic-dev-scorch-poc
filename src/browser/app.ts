@@ -80,6 +80,7 @@ export function startGame(): void {
   let previousTimestamp = 0;
   let accumulatorSeconds = 0;
   let displayedState = '';
+  let simulationFailed = false;
   const updateAim = () => setAim(game, Number(controls.angle.value), Number(controls.power.value));
 
   controls.angle.addEventListener('input', updateAim);
@@ -93,29 +94,48 @@ export function startGame(): void {
     presentation = createPresentation();
     accumulatorSeconds = 0;
     displayedState = '';
+    simulationFailed = false;
   };
 
   controls.restart.addEventListener('click', restart);
   bindArcadeInput(controls.canvas, context, () => game, restart);
+
+  const advanceSimulation = (elapsedSeconds: number): void => {
+    if (simulationFailed) {
+      return;
+    }
+
+    accumulatorSeconds += elapsedSeconds;
+
+    try {
+      while (accumulatorSeconds >= STEP_SECONDS) {
+        stepGame(game, STEP_SECONDS);
+        accumulatorSeconds -= STEP_SECONDS;
+      }
+    } catch (error) {
+      // A failed step may have partially mutated the match; only restart can resume it.
+      simulationFailed = true;
+      accumulatorSeconds = 0;
+      console.error('Simulation stopped; start a new match to recover.', error);
+      controls.fieldset.disabled = true;
+      controls.status.textContent = 'Shot resolution failed. Select New match to play again.';
+      controls.status.dataset.phase = 'error';
+    }
+  };
 
   const frame = (timestamp: number): void => {
     // Discard excess time after a background tab pause, rather than jumping a shot.
     const elapsedSeconds = Math.min((timestamp - previousTimestamp) / 1000, 0.1);
 
     previousTimestamp = timestamp;
-    accumulatorSeconds += elapsedSeconds;
-
-    while (accumulatorSeconds >= STEP_SECONDS) {
-      stepGame(game, STEP_SECONDS);
-      accumulatorSeconds -= STEP_SECONDS;
-    }
+    advanceSimulation(elapsedSeconds);
 
     updatePresentation(presentation, game);
     const tank = game.tanks[game.activePlayer];
     const healthKey = game.tanks.map((player) => player.health).join('/');
     const stateKey = `${game.phase}/${game.activePlayer}/${tank.angle}/${tank.power}/${presentation.outcome}/${healthKey}`;
 
-    if (stateKey !== displayedState) {
+    if (!simulationFailed && stateKey !== displayedState) {
       syncControls(controls, game, presentation.outcome);
       displayedState = stateKey;
     }
