@@ -61,6 +61,27 @@ Code must be optimized for human comprehension, not minimum token count.
 
 Before completing a task, review the modified code as if another developer had to maintain it without additional explanations.
 
+### Task Traceability
+
+For each completed task, save a concise execution report under `docs/tasks/`.
+
+Use the task identifier when available (e.g. `TASK1.md` → `docs/tasks/TASK1-result.md`). Otherwise, use a descriptive filename.
+
+Include:
+- **Objective:** what was requested, referencing the original task.
+- **Changes:** what was actually implemented and key decisions made.
+- **Verification:** commands executed, results, and relevant metrics.
+- **Deviations:** differences from the task, unresolved issues, and limitations.
+- **Outcome:** completed, partially completed, or blocked.
+
+Record observed facts, not assumed results. Never claim tests passed unless executed.
+
+Keep the report brief and useful for a future developer. Do not reproduce the full conversation, tool output, or source code.
+
+Create the report before declaring the task complete. If the task is interrupted or blocked, record the available results and blockers.
+
+The final chat response should summarize the outcome and link to the report.
+
 ## Development tooling
 
 Pi is the primary AI coding agent.
