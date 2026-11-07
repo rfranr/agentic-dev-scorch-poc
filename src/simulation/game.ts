@@ -13,7 +13,7 @@ import {
 import { moveProjectile, traceFlight } from './ballistics';
 import { carveCrater, generateTerrain, settleTank } from './terrain';
 import { stepMaterial, wakeMaterial } from './material';
-import { stepTank } from './tank-physics';
+import { stepTank, walkTank } from './tank-physics';
 
 const STABLE_INTERVAL_SECONDS = 0.2;
 const MAX_RESOLUTION_SECONDS = 10;
@@ -179,7 +179,27 @@ function advanceResolution(game: Game, seconds: number): void {
   }
 }
 
-export function stepGame(game: Game, seconds: number): void {
+function advanceAiming(game: Game, seconds: number, movement: number): void {
+  const tank = game.tanks[game.activePlayer];
+
+  if (walkTank(tank, game.terrain, movement, seconds)) {
+    wakeMaterial(game.terrain);
+  }
+
+  advanceWorld(game, seconds);
+
+  if (game.tanks.some((player) => !player.alive)) {
+    finishShot(game);
+  }
+}
+
+export function stepGame(game: Game, seconds: number, movement = 0): void {
+  if (game.phase === 'aiming') {
+    advanceAiming(game, seconds, movement);
+
+    return;
+  }
+
   if (game.phase === 'flying') {
     advanceFlight(game, seconds);
 

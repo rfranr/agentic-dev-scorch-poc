@@ -98,7 +98,7 @@ export function startGame(): void {
   };
 
   controls.restart.addEventListener('click', restart);
-  bindArcadeInput(controls.canvas, context, () => game, restart);
+  const movementDirection = bindArcadeInput(controls.canvas, context, () => game, restart);
 
   const advanceSimulation = (elapsedSeconds: number): void => {
     if (simulationFailed) {
@@ -109,7 +109,7 @@ export function startGame(): void {
 
     try {
       while (accumulatorSeconds >= STEP_SECONDS) {
-        stepGame(game, STEP_SECONDS);
+        stepGame(game, STEP_SECONDS, movementDirection());
         accumulatorSeconds -= STEP_SECONDS;
       }
     } catch (error) {

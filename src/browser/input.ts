@@ -7,7 +7,14 @@ export function bindArcadeInput(
   context: CanvasRenderingContext2D,
   currentGame: () => Game,
   restart: () => void,
-): void {
+): () => number {
+  // Held keys belong to this binding, not a match; clear on focus loss.
+  const held = new Set<string>();
+  const clearMovement = () => held.clear();
+
+  window.addEventListener('keyup', (event) => held.delete(event.code));
+  window.addEventListener('blur', clearMovement);
+  window.addEventListener('focusin', clearMovement);
   canvas.addEventListener('pointermove', (event) => {
     if (event.pointerType !== 'mouse') {
       return;
@@ -44,8 +51,15 @@ export function bindArcadeInput(
       return;
     }
 
+    if (event.code === 'KeyA' || event.code === 'KeyD') {
+      event.preventDefault();
+      held.add(event.code);
+    }
+
     handleKey(event, currentGame(), restart);
   });
+
+  return () => Number(held.has('KeyD')) - Number(held.has('KeyA'));
 }
 
 function ownsKeyboardInput(event: KeyboardEvent): boolean {
