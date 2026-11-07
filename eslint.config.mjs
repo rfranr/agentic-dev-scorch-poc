@@ -98,7 +98,7 @@ export default tseslint.config(
     },
   },
 
-  // Node.js verification fixtures and maintained scripts
+  // Node.js tests and maintained scripts
   {
     files: ["tests/**/*.ts", "tests/**/*.mjs", "scripts/**/*.{js,mjs,cjs,ts}"],
     languageOptions: {
@@ -114,14 +114,18 @@ export default tseslint.config(
     },
   },
 
-  // Browser fixture
+  // Browser entry and rendering code only; simulation stays runtime-neutral.
   {
     files: [
       "src/main.ts",
+      "src/browser/**/*.{ts,js,mjs}",
     ],
     languageOptions: {
       globals: {
         window: "readonly",
+        document: "readonly",
+        requestAnimationFrame: "readonly",
+        cancelAnimationFrame: "readonly",
       },
     },
   },

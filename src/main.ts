@@ -1,4 +1,2 @@
-// Extraction fixture only; replace this page when adopting the environment.
-import { fixtureLabel } from './fixture.mjs';
-
-window.document.title = fixtureLabel;
+// Browser entry point. Gameplay will be added in the playable vertical slice.
+document.title = 'Scorch';
