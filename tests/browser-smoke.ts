@@ -1,6 +1,6 @@
 import { test, type TestContext } from 'node:test';
 import assert from 'node:assert/strict';
-import { chromium, type Page } from 'playwright';
+import { chromium, type Browser, type Page } from 'playwright';
 import { createServer, preview } from 'vite';
 
 async function setSlider(page: Page, id: string, value: number): Promise<void> {
@@ -100,6 +100,43 @@ async function verifyResponsiveLayout(page: Page): Promise<void> {
   }
 }
 
+async function verifyDesktop(browser: Browser, url: string): Promise<void> {
+  const page = await browser.newPage({ deviceScaleFactor: 2 });
+
+  await page.goto(url);
+  await verifyArcadeControls(page);
+  await page.close();
+}
+
+async function verifyArcadeControls(page: Page): Promise<void> {
+  await waitForPhase(page, 'aiming');
+  assert.equal(await page.locator('#aim-form').isVisible(), false);
+  await page.mouse.move(650, 160);
+  await page.waitForFunction(() => document.getElementById('angle-value')?.textContent !== '45°');
+  const mouseAngle = Number.parseInt(await page.locator('#angle-value').innerText());
+
+  await page.keyboard.press('ArrowLeft');
+  await page.waitForFunction(
+    (angle) => document.getElementById('angle-value')?.textContent === `${angle + 1}°`,
+    mouseAngle,
+  );
+  await page.mouse.wheel(0, -100);
+  await page.waitForFunction(() => (document.getElementById('power') as HTMLInputElement).value === '365');
+  await page.keyboard.press('ArrowDown');
+  await page.waitForFunction(() => (document.getElementById('power') as HTMLInputElement).value === '360');
+  assert.equal(await page.evaluate(() => window.scrollY), 0);
+  await page.mouse.click(650, 160);
+  await waitForPhase(page, 'flying');
+  await page.keyboard.press('Space');
+  await waitForPhase(page, 'flying');
+  await page.keyboard.press('r');
+  await waitForPhase(page, 'aiming');
+  await page.keyboard.press('Space');
+  await waitForPhase(page, 'flying');
+  await page.getByRole('button', { name: 'New match' }).click();
+  await waitForPhase(page, 'aiming');
+}
+
 async function verifyBrowser(context: TestContext, production: boolean): Promise<void> {
   const server = production
     ? await preview({ preview: { host: '127.0.0.1', port: 0 } })
@@ -115,7 +152,8 @@ async function verifyBrowser(context: TestContext, production: boolean): Promise
 
   context.after(() => browser.close());
 
-  const page = await browser.newPage({ deviceScaleFactor: 2 });
+  await verifyDesktop(browser, server.resolvedUrls!.local[0]);
+  const page = await browser.newPage({ deviceScaleFactor: 2, hasTouch: true, isMobile: true });
   const errors: string[] = [];
 
   page.on('pageerror', (error) => errors.push(error.message));

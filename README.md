@@ -45,8 +45,11 @@ npm run preview
 
 1. Player 1 is blue on the left; Player 2 is orange on the right. A white ground
    ring marks the active tank, and the status text identifies whose turn it is.
-2. Adjust **Angle** and **Power**, then press **Fire!** Sliders support mouse and
-   keyboard arrow keys. Angle is relative to the direction toward your opponent:
+2. Desktop: move the mouse to aim, scroll the wheel up/down to increase/decrease
+   power, and left-click the battlefield to fire. Alternatively, use Left/Right
+   arrows to rotate, Up/Down to adjust power, and Space to fire. Both use the same
+   aim state. Touch devices retain the Angle/Power sliders and **Fire!** button.
+   Angle is relative to the direction toward your opponent:
    45° arcs forward, 90° shoots vertically, and angles above 90° shoot backward.
 3. The dotted guide shows launch direction, not a predicted trajectory. Power is
    shown as a percentage of maximum launch speed. Watch the projectile trail and
@@ -56,7 +59,7 @@ npm run preview
 4. A direct hit or nearby blast destroys a tank. Craters persist; tanks settle
    instantly onto remaining ground without falling damage. Self-destruction can
    award the other player the win; mutual destruction is a draw.
-5. Press **New match** at any time, including during flight or after a win, to
+5. Press **New match** or **R** at any time, including during flight or after a win, to
    generate new terrain and restart without reloading.
 
 ## Develop and verify

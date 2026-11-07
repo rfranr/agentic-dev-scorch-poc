@@ -162,3 +162,46 @@ details[open] {
     max-width: 50%;
   }
 }
+
+main {
+  pointer-events: none;
+  user-select: none;
+}
+button,
+form,
+details {
+  pointer-events: auto;
+}
+canvas {
+  z-index: 0;
+  pointer-events: auto;
+  touch-action: none;
+}
+header,
+main > p,
+form,
+details {
+  position: relative;
+  z-index: 1;
+}
+#aim-readout {
+  margin: 4px 0;
+}
+#last-shot {
+  margin-top: auto;
+}
+.arcade-help {
+  font-size: 0.85rem;
+  animation: hide-help 1s 8s forwards;
+}
+@keyframes hide-help {
+  to {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  #aim-form {
+    display: none;
+  }
+}

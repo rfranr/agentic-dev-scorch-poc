@@ -14,7 +14,8 @@ export function prepareCamera(context: CanvasRenderingContext2D): ViewBounds {
   const height = window.innerHeight;
   const pixelRatio = Math.min(window.devicePixelRatio || 1, 2);
   const top = document.getElementById('health')?.getBoundingClientRect().bottom ?? 80;
-  const bottom = document.getElementById('aim-form')?.getBoundingClientRect().top ?? height - 160;
+  const form = document.getElementById('aim-form');
+  const bottom = form?.getClientRects().length ? form.getBoundingClientRect().top : height - 48;
   const availableHeight = Math.max(1, bottom - top - 16);
   const scale = Math.min(width / WORLD.width, availableHeight / WORLD.height);
 

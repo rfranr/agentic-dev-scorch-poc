@@ -1,6 +1,7 @@
 import { createGame, fire, setAim, stepGame } from '../simulation/game';
 import { AIM_LIMITS, STEP_SECONDS, type Game } from '../simulation/model';
 import { renderGame } from './render';
+import { bindArcadeInput } from './input';
 import { createPresentation, updatePresentation } from './presentation';
 
 function element<T extends HTMLElement>(id: string): T {
@@ -51,7 +52,9 @@ function syncControls(controls: Controls, game: Game, outcome: string): void {
   controls.fieldset.disabled = game.phase !== 'aiming';
   controls.angle.value = String(tank.angle);
   controls.power.value = String(tank.power);
-  controls.angleValue.value = `${tank.angle}°`;
+  controls.angleValue.value = `${Math.round(tank.angle)}°`;
+  element('aim-readout').textContent =
+    `Angle ${Math.round(tank.angle)}° · Power ${Math.round((tank.power / AIM_LIMITS.maxPower) * 100)}%`;
   controls.powerValue.value = `${Math.round((tank.power / AIM_LIMITS.maxPower) * 100)}%`;
   controls.status.textContent = statusText(game);
   controls.status.dataset.phase = game.phase;
@@ -85,12 +88,15 @@ export function startGame(): void {
     event.preventDefault();
     fire(game);
   });
-  controls.restart.addEventListener('click', () => {
+  const restart = () => {
     game = createGame();
     presentation = createPresentation();
     accumulatorSeconds = 0;
     displayedState = '';
-  });
+  };
+
+  controls.restart.addEventListener('click', restart);
+  bindArcadeInput(controls.canvas, context, () => game, restart);
 
   const frame = (timestamp: number): void => {
     // Discard excess time after a background tab pause, rather than jumping a shot.
