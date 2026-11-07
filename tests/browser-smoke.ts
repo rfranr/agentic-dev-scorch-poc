@@ -64,6 +64,25 @@ async function verifyTurnsAndRestart(page: Page): Promise<void> {
   assert.equal(await page.locator('#fire').isEnabled(), true);
 }
 
+async function verifyResponsiveLayout(page: Page): Promise<void> {
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1280, height: 720 },
+    { width: 1280, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    const battlefield = await page.locator('#battlefield').boundingBox();
+    const fireButton = await page.locator('#fire').boundingBox();
+
+    assert.ok(battlefield);
+    assert.ok(fireButton);
+    assert.ok(battlefield.width >= 360);
+    assert.ok(fireButton.y + fireButton.height < viewport.height, 'Fire stays in the initial viewport');
+    assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    assert.equal(await page.locator('#power-value').innerText(), '69%');
+  }
+}
+
 async function verifyBrowser(context: TestContext, production: boolean): Promise<void> {
   const server = production
     ? await preview({ preview: { host: '127.0.0.1', port: 0 } })
@@ -96,6 +115,7 @@ async function verifyBrowser(context: TestContext, production: boolean): Promise
   await page.goto(server.resolvedUrls!.local[0]);
   await waitForPhase(page, 'aiming');
   assert.equal(await page.title(), 'Scorch');
+  await verifyResponsiveLayout(page);
   await verifyWinningShot(page);
   await verifyTurnsAndRestart(page);
   assert.deepEqual(errors, []);

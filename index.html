@@ -29,18 +29,24 @@
           <legend>Aim the active tank</legend>
           <label for="angle">Angle <output id="angle-value" for="angle">45°</output></label>
           <input id="angle" type="range" min="5" max="175" step="1" value="45" aria-describedby="aim-help" />
-          <label for="power">Power <output id="power-value" for="power">360 px/s</output></label>
+          <label for="power">Power <output id="power-value" for="power">69%</output></label>
           <input id="power" type="range" min="80" max="520" step="5" value="360" />
           <button id="fire" type="submit">Fire!</button>
         </fieldset>
       </form>
       <p id="last-shot">Aim toward the other tank, then fire.</p>
       <p id="aim-help" class="help">
-        Angle is measured above the direction toward your opponent: 45° arcs forward, 90° fires straight up. Adjust
-        sliders with the mouse or arrow keys, then press Fire. Aim close to a tank to destroy it. Shots leave craters;
-        tanks settle onto the remaining ground. Each player keeps their own aim.
+        Aim along the dotted guide. 45° fires toward your opponent; 90° fires up. More power sends the shot farther. The
+        guide shows launch direction, not the full flight path.
       </p>
-      <p class="help">One shot at a time. No wind. New match restarts at any time.</p>
+      <details class="help">
+        <summary>How to play</summary>
+        <p>
+          Blue is Player 1; orange is Player 2. The ground ring marks the active tank. Adjust sliders with the mouse or
+          arrow keys, then press Fire. Angles above 90° fire backward. A nearby blast destroys a tank; craters remain
+          and tanks settle onto the ground. Each player keeps their aim. No wind. New match restarts at any time.
+        </p>
+      </details>
       <noscript><p>Enable JavaScript to play Scorch.</p></noscript>
     </main>
     <script type="module" src="/src/main.ts"></script>

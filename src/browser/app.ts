@@ -1,6 +1,7 @@
 import { createGame, fire, setAim, stepGame } from '../simulation/game';
-import { STEP_SECONDS, type Game } from '../simulation/model';
+import { AIM_LIMITS, STEP_SECONDS, type Game } from '../simulation/model';
 import { renderGame } from './render';
+import { createPresentation, updatePresentation } from './presentation';
 
 function element<T extends HTMLElement>(id: string): T {
   const found = document.getElementById(id);
@@ -50,7 +51,7 @@ function syncControls(controls: Controls, game: Game): void {
   controls.angle.value = String(tank.angle);
   controls.power.value = String(tank.power);
   controls.angleValue.value = `${tank.angle}°`;
-  controls.powerValue.value = `${tank.power} px/s`;
+  controls.powerValue.value = `${Math.round((tank.power / AIM_LIMITS.maxPower) * 100)}%`;
   controls.status.textContent = statusText(game);
   controls.status.dataset.phase = game.phase;
   controls.lastShot.textContent = game.lastShot;
@@ -67,6 +68,7 @@ export function startGame(): void {
   }
 
   let game = createGame();
+  let presentation = createPresentation();
   let previousTimestamp = 0;
   let accumulatorSeconds = 0;
   let displayedState = '';
@@ -80,6 +82,7 @@ export function startGame(): void {
   });
   controls.restart.addEventListener('click', () => {
     game = createGame();
+    presentation = createPresentation();
     accumulatorSeconds = 0;
     displayedState = '';
   });
@@ -104,7 +107,8 @@ export function startGame(): void {
       displayedState = stateKey;
     }
 
-    renderGame(context, game);
+    updatePresentation(presentation, game);
+    renderGame(context, game, presentation);
     requestAnimationFrame(frame);
   };
 

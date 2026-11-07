@@ -43,13 +43,16 @@ npm run preview
 
 ## Play
 
-1. Player 1 is blue on the left; Player 2 is orange on the right. The outlined
-   tank is active, and the status text identifies whose turn it is.
+1. Player 1 is blue on the left; Player 2 is orange on the right. A white ground
+   ring marks the active tank, and the status text identifies whose turn it is.
 2. Adjust **Angle** and **Power**, then press **Fire!** Sliders support mouse and
    keyboard arrow keys. Angle is relative to the direction toward your opponent:
    45° arcs forward, 90° shoots vertically, and angles above 90° shoot backward.
-3. Watch the shot, then pass control to the other player. Each tank remembers its
-   aim. There is no wind, and only one shot can be active.
+3. The dotted guide shows launch direction, not a predicted trajectory. Power is
+   shown as a percentage of maximum launch speed. Watch the projectile trail and
+   impact marker; the range message says whether an impact fell short of or past
+   the opponent horizontally. Pass control to the other player. Each tank remembers
+   its aim. There is no wind, and only one shot can be active.
 4. A direct hit or nearby blast destroys a tank. Craters persist; tanks settle
    instantly onto remaining ground without falling damage. Self-destruction can
    award the other player the win; mutual destruction is a draw.

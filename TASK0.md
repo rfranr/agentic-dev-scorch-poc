@@ -1,0 +1,1 @@
+Evaluate the current game as a visual product, not as a software implementation. Identify the main problems with composition, scale, terrain appearance, visual feedback, and playability. Propose a small set of improvements with observable acceptance criteria. Do not modify code yet.
