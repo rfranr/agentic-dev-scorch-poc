@@ -201,7 +201,11 @@ details {
   }
 }
 @media (hover: hover) and (pointer: fine) {
-  #aim-form {
+  #aim-controls {
+    grid-template-columns: auto minmax(100px, 160px);
+    width: fit-content;
+  }
+  #aim-controls > :not(legend, label[for='weapon'], #weapon) {
     display: none;
   }
 }

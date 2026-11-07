@@ -115,7 +115,11 @@ async function verifyDesktop(browser: Browser, url: string): Promise<void> {
 
 async function verifyArcadeControls(page: Page): Promise<void> {
   await waitForPhase(page, 'aiming');
-  assert.equal(await page.locator('#aim-form').isVisible(), false);
+  assert.equal(await page.locator('#weapon').isVisible(), true);
+  assert.equal(await page.locator('#fire').isVisible(), false);
+  await page.locator('#weapon').selectOption('heavy');
+  assert.equal(await page.locator('#weapon').inputValue(), 'heavy');
+  await page.locator('#weapon').blur();
   await page.mouse.move(650, 160);
   await page.waitForFunction(() => document.getElementById('angle-value')?.textContent !== '45°');
   const mouseAngle = Number.parseInt(await page.locator('#angle-value').innerText());
