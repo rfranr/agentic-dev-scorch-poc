@@ -1,4 +1,5 @@
 import { AIM_LIMITS, BARREL_LENGTH, WORLD, muzzle, type Tank } from '../simulation/model';
+import type { ViewBounds } from './camera';
 
 export function drawSoil(context: CanvasRenderingContext2D): void {
   context.strokeStyle = '#a4ae7c25';
@@ -16,16 +17,16 @@ export function drawSoil(context: CanvasRenderingContext2D): void {
   }
 }
 
-export function drawDistantHills(context: CanvasRenderingContext2D): void {
+export function drawDistantHills(context: CanvasRenderingContext2D, view: ViewBounds): void {
   context.fillStyle = '#53728245';
   context.beginPath();
-  context.moveTo(0, WORLD.height);
+  context.moveTo(view.x, view.y + view.height);
 
-  for (let x = 0; x <= WORLD.width; x += 8) {
+  for (let x = view.x; x <= view.x + view.width + 8; x += 8) {
     context.lineTo(x, 310 + Math.sin(x / 170) * 28 + Math.cos(x / 79) * 12);
   }
 
-  context.lineTo(WORLD.width, WORLD.height);
+  context.lineTo(view.x + view.width, view.y + view.height);
   context.fill();
 }
 

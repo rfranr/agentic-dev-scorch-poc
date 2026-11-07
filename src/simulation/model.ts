@@ -19,6 +19,9 @@ export interface Tank extends Point {
   angle: number; // Degrees above the inward-facing horizontal.
   power: number; // Launch speed in world pixels per second.
   alive: boolean;
+  health: number;
+  velocityY: number;
+  grounded: boolean;
 }
 
 export interface Projectile extends Point {
@@ -30,9 +33,25 @@ export interface Explosion extends Point {
   ageSeconds: number;
 }
 
+export const CELL_SIZE = 2;
+export const GRID_WIDTH = WORLD.width / CELL_SIZE;
+export const GRID_HEIGHT = WORLD.height / CELL_SIZE;
+
+export interface Terrain {
+  revision: number;
+  cells: Uint8Array; // 0 air, 1 cohesive earth, 2 loose rubble.
+  materialSeconds: number;
+  materialDistance: number;
+  materialSpeed: number;
+  diagonalDirection: number;
+  moving: boolean;
+}
+
 // One match owns all mutable state. Restart replaces it, including terrain and aim.
 export interface Game {
-  terrain: number[]; // Surface y for each integer x; solid ground extends downward.
+  terrain: Terrain;
+  stableSeconds: number;
+  resolutionSeconds: number;
   tanks: Tank[];
   activePlayer: number;
   phase: 'aiming' | 'flying' | 'exploding' | 'finished';

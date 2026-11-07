@@ -12,6 +12,11 @@ import {
 } from './model';
 import { moveProjectile, traceFlight } from './ballistics';
 import { carveCrater, generateTerrain, settleTank } from './terrain';
+import { stepMaterial, wakeMaterial } from './material';
+import { stepTank } from './tank-physics';
+
+const STABLE_INTERVAL_SECONDS = 0.2;
+const MAX_RESOLUTION_SECONDS = 10;
 
 export function createGame(random: () => number = Math.random): Game {
   const terrain = generateTerrain(random);
@@ -24,6 +29,9 @@ export function createGame(random: () => number = Math.random): Game {
       angle: 45,
       power: 360,
       alive: true,
+      health: 100,
+      velocityY: 0,
+      grounded: true,
     };
 
     settleTank(tank, terrain);
@@ -33,6 +41,8 @@ export function createGame(random: () => number = Math.random): Game {
 
   return {
     terrain,
+    stableSeconds: 0,
+    resolutionSeconds: 0,
     tanks,
     activePlayer: 0,
     phase: 'aiming',
@@ -95,7 +105,9 @@ function explode(game: Game, impact: Point): void {
   game.projectile = null;
   game.explosion = { x: impact.x, y: impact.y, ageSeconds: 0 };
   game.phase = 'exploding';
-  game.lastShot = 'Impact! Terrain changed.';
+  game.lastShot = 'Impact — waiting for terrain and tanks to settle.';
+  game.stableSeconds = 0;
+  game.resolutionSeconds = 0;
   carveCrater(game.terrain, impact);
 
   // Damage precedes settling: a tank cannot dodge the blast by falling.
@@ -104,7 +116,10 @@ function explode(game: Game, impact: Point): void {
     const distance = Math.hypot(tank.x - impact.x, tank.y - impact.y);
 
     tank.alive = tank.alive && distance > DAMAGE_RADIUS + TANK_RADIUS;
-    settleTank(tank, game.terrain);
+
+    if (!tank.alive) {
+      tank.health = 0;
+    }
   }
 }
 
@@ -130,6 +145,40 @@ function advanceFlight(game: Game, seconds: number): void {
   }
 }
 
+function advanceWorld(game: Game, seconds: number): boolean {
+  const materialMoved = stepMaterial(game.terrain, game.tanks, seconds);
+  const tankMovement = game.tanks.map((tank) => stepTank(tank, game.terrain, seconds));
+  const tanksMoved = tankMovement.some(Boolean);
+  const moving = materialMoved || tanksMoved;
+
+  // Deposits resting on a tank must wake when that support moves.
+  if (tanksMoved) {
+    wakeMaterial(game.terrain);
+  }
+
+  return moving;
+}
+
+function advanceResolution(game: Game, seconds: number): void {
+  const moving = advanceWorld(game, seconds);
+
+  game.stableSeconds = moving ? 0 : game.stableSeconds + seconds;
+  game.resolutionSeconds += seconds;
+
+  if (game.explosion) {
+    game.explosion.ageSeconds += seconds;
+  }
+
+  if (game.resolutionSeconds > MAX_RESOLUTION_SECONDS) {
+    throw new Error('Shot resolution exceeded 10 seconds; terrain or tank dynamics did not settle.');
+  }
+
+  if (game.resolutionSeconds >= EXPLOSION_SECONDS && game.stableSeconds >= STABLE_INTERVAL_SECONDS) {
+    game.lastShot = `Settled. P1: ${Math.round(game.tanks[0].health)} HP; P2: ${Math.round(game.tanks[1].health)} HP.`;
+    finishShot(game);
+  }
+}
+
 export function stepGame(game: Game, seconds: number): void {
   if (game.phase === 'flying') {
     advanceFlight(game, seconds);
@@ -141,9 +190,5 @@ export function stepGame(game: Game, seconds: number): void {
     return;
   }
 
-  game.explosion.ageSeconds += seconds;
-
-  if (game.explosion.ageSeconds >= EXPLOSION_SECONDS) {
-    finishShot(game);
-  }
+  advanceResolution(game, seconds);
 }

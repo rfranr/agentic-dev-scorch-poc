@@ -24,12 +24,19 @@ export function updatePresentation(presentation: Presentation, game: Game): void
     presentation.trail = presentation.trail.slice(-24);
   }
 
+  updateOutcome(presentation, game);
+  presentation.previousPhase = game.phase;
+}
+
+function updateOutcome(presentation: Presentation, game: Game): void {
   if (game.explosion && presentation.previousPhase !== 'exploding') {
     presentation.impact = { x: game.explosion.x, y: game.explosion.y };
     presentation.outcome = describeImpact(game, game.explosion);
   }
 
-  presentation.previousPhase = game.phase;
+  if (presentation.previousPhase === 'exploding' && game.phase !== 'exploding') {
+    presentation.outcome = game.lastShot;
+  }
 }
 
 function describeImpact(game: Game, impact: Point): string {

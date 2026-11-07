@@ -1,5 +1,5 @@
 import { GRAVITY, TANK_RADIUS, WORLD, type Game, type Point, type Projectile } from './model';
-import { surfaceAt } from './terrain';
+import { solidAt } from './terrain';
 
 export function moveProjectile(projectile: Projectile, seconds: number): Projectile {
   return {
@@ -20,7 +20,7 @@ export function collides(game: Game, point: Point): boolean {
     (tank) => tank.alive && Math.hypot(point.x - tank.x, point.y - tank.y) <= TANK_RADIUS,
   );
 
-  return hitsTank || point.y >= surfaceAt(game.terrain, point.x);
+  return hitsTank || solidAt(game.terrain, point.x, point.y);
 }
 
 export interface FlightResult {

@@ -24,6 +24,7 @@ function readControls() {
     powerValue: element<HTMLOutputElement>('power-value'),
     status: element<HTMLParagraphElement>('status'),
     lastShot: element<HTMLParagraphElement>('last-shot'),
+    health: element<HTMLParagraphElement>('health'),
     restart: element<HTMLButtonElement>('restart'),
   };
 }
@@ -54,6 +55,9 @@ function syncControls(controls: Controls, game: Game, outcome: string): void {
   controls.powerValue.value = `${Math.round((tank.power / AIM_LIMITS.maxPower) * 100)}%`;
   controls.status.textContent = statusText(game);
   controls.status.dataset.phase = game.phase;
+  controls.health.textContent = game.tanks
+    .map((player) => `P${player.player + 1}: ${Math.round(player.health)} HP`)
+    .join(' · ');
   // The status owns the final result; shot feedback is only useful before it.
   controls.lastShot.textContent = game.phase === 'finished' ? '' : outcome || game.lastShot;
 }
@@ -102,7 +106,8 @@ export function startGame(): void {
 
     updatePresentation(presentation, game);
     const tank = game.tanks[game.activePlayer];
-    const stateKey = `${game.phase}/${game.activePlayer}/${tank.angle}/${tank.power}/${presentation.outcome}`;
+    const healthKey = game.tanks.map((player) => player.health).join('/');
+    const stateKey = `${game.phase}/${game.activePlayer}/${tank.angle}/${tank.power}/${presentation.outcome}/${healthKey}`;
 
     if (stateKey !== displayedState) {
       syncControls(controls, game, presentation.outcome);

@@ -1,5 +1,7 @@
 # TASK2 — Battlefield and terrain redesign proposal
 
+> Historical pre-implementation analysis. The user subsequently approved implementation; see the [implementation result](TASK2-implementation-result.md) for current changes and verification.
+
 ## Objective and outcome
 
 Evaluate [TASK2](../../TASK2.md) before implementation: fullscreen presentation, dynamic tanks, destructible terrain, and a coherent artillery aesthetic. **Analysis completed; implementation awaits approval.** No source, tests, dependencies, or quality configuration changed.

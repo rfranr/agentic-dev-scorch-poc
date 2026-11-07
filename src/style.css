@@ -1,64 +1,69 @@
 :root {
   font-family: system-ui, sans-serif;
   color: #edf4fa;
-  background: #101923;
+  background: #192638;
   color-scheme: dark;
 }
-
 * {
   box-sizing: border-box;
 }
 body {
   margin: 0;
+  overflow: hidden;
 }
 main {
-  max-width: 920px;
-  margin: 0 auto;
-  padding: 16px 20px 24px;
+  height: 100dvh;
+  padding: max(8px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+    max(8px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
 }
 header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 8px;
 }
 h1 {
   margin: 0;
-  font-size: 2rem;
+  font-size: 1.3rem;
   letter-spacing: 0.05em;
 }
 .eyebrow {
-  color: #a9bfcc;
-  font-size: 0.75rem;
-  letter-spacing: 0.14em;
-  margin: 0 0 4px;
+  display: none;
 }
 #status {
-  font-size: 1.15rem;
+  margin: 6px 0;
   font-weight: 650;
   min-height: 1.5em;
+}
+#health {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #f2d49a;
 }
 #status[data-phase='finished'] {
   color: #ffdf8c;
 }
 canvas {
-  display: block;
+  position: fixed;
+  inset: 0;
   width: 100%;
-  height: auto;
-  border: 1px solid #607c8a;
-  border-radius: 8px;
+  height: 100%;
+  z-index: -1;
 }
 form {
-  margin-top: 12px;
+  margin-top: auto;
 }
 fieldset {
   display: grid;
-  grid-template-columns: auto minmax(100px, 1fr) auto minmax(100px, 1fr) auto;
+  grid-template-columns: auto minmax(44px, 1fr) auto minmax(44px, 1fr) auto;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
   border: 1px solid #526775;
   border-radius: 8px;
-  padding: 12px 16px 16px;
+  padding: 6px 12px;
+  background: #192638;
 }
 legend {
   color: #b6cbd7;
@@ -71,17 +76,19 @@ output {
   display: block;
   font-size: 0.85rem;
   font-weight: 400;
-  min-width: 75px;
-  margin-top: 4px;
 }
 input[type='range'] {
   width: 100%;
+  min-width: 44px;
+  min-height: 44px;
   accent-color: #9ce2ff;
 }
 button {
+  min-width: 44px;
+  min-height: 44px;
   border: 1px solid #a5c1cf;
   border-radius: 6px;
-  padding: 10px 20px;
+  padding: 8px 12px;
   background: #283d4d;
   color: #fff;
   font: inherit;
@@ -102,41 +109,56 @@ fieldset:disabled {
 }
 :focus-visible {
   outline: 3px solid #ffdf8c;
-  outline-offset: 4px;
+  outline-offset: 2px;
 }
 #last-shot {
   min-height: 1.5em;
-  margin: 10px 0;
-  color: #d8e5ee;
+  margin: 4px 0;
+  font-size: 0.85rem;
 }
 .help {
-  color: #a9bfcc;
-  line-height: 1.5;
-  font-size: 0.9rem;
-  margin: 8px 0;
+  color: #c2d1df;
+  font-size: 0.85rem;
+  margin: 0;
 }
 summary {
   cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
 }
-input[type='range'] {
-  min-height: 32px;
+#aim-help {
+  display: none;
 }
-@media (min-width: 701px) and (max-height: 800px) {
-  main {
-    max-width: 760px;
-  }
+details[open] {
+  position: fixed;
+  inset: 10% 8%;
+  overflow: auto;
+  padding: 16px;
+  background: #192638;
+  border: 2px solid #f2d49a;
+  z-index: 2;
 }
-
-@media (max-width: 700px) {
-  main {
-    padding: 12px;
-  }
+@media (max-width: 500px) {
   fieldset {
     grid-template-columns: auto 1fr;
-    gap: 8px 12px;
-    padding: 8px 12px 12px;
   }
   #fire {
     grid-column: 1 / -1;
+  }
+}
+@media (max-height: 450px) {
+  main {
+    padding-top: 4px;
+    padding-bottom: 4px;
+  }
+  header h1 {
+    font-size: 1rem;
+  }
+  #last-shot {
+    position: absolute;
+    top: 8px;
+    left: 25%;
+    max-width: 50%;
   }
 }

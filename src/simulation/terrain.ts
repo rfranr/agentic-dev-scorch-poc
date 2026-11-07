@@ -1,44 +1,102 @@
-import { BLAST_RADIUS, TANK_RADIUS, WORLD, clamp, type Point, type Tank } from './model';
+import {
+  BLAST_RADIUS,
+  CELL_SIZE,
+  GRID_HEIGHT,
+  GRID_WIDTH,
+  TANK_RADIUS,
+  clamp,
+  type Point,
+  type Tank,
+  type Terrain,
+} from './model';
+import { detachEarth } from './terrain-connectivity';
 
-export function generateTerrain(random: () => number = Math.random): number[] {
+export function terrainFromSurface(surface: (x: number) => number): Terrain {
+  const cells = new Uint8Array(GRID_WIDTH * GRID_HEIGHT);
+
+  cells.forEach((_, index) => {
+    const row = Math.floor(index / GRID_WIDTH);
+    const column = index % GRID_WIDTH;
+
+    if (row * CELL_SIZE >= surface(column * CELL_SIZE)) {
+      cells[index] = 1;
+    }
+  });
+  cells.fill(1, (GRID_HEIGHT - 1) * GRID_WIDTH);
+
+  return {
+    revision: 0,
+    cells,
+    materialSeconds: 0,
+    materialDistance: 0,
+    materialSpeed: 0,
+    diagonalDirection: 1,
+    moving: false,
+  };
+}
+
+export function generateTerrain(random: () => number = Math.random): Terrain {
   const phase = random() * Math.PI * 2;
   const secondaryPhase = random() * Math.PI * 2;
 
-  return Array.from({ length: WORLD.width }, (_, x) => {
-    const broadHill = Math.sin(x / 145 + phase) * 42;
-    const smallHills = Math.sin(x / 53 + secondaryPhase) * 15;
-
-    return Math.round(WORLD.height * 0.73 + broadHill + smallHills);
-  });
+  return terrainFromSurface(
+    (x) => 540 * 0.73 + Math.sin(x / 145 + phase) * 42 + Math.sin(x / 53 + secondaryPhase) * 15,
+  );
 }
 
-export function surfaceAt(terrain: number[], x: number): number {
-  const column = clamp(Math.round(x), 0, terrain.length - 1);
+export function solidAt(terrain: Terrain, x: number, y: number): boolean {
+  const column = Math.floor(x / CELL_SIZE);
+  const row = Math.floor(y / CELL_SIZE);
 
-  return terrain[column];
+  return (
+    column >= 0 &&
+    column < GRID_WIDTH &&
+    row >= 0 &&
+    row < GRID_HEIGHT &&
+    terrain.cells[row * GRID_WIDTH + column] !== 0
+  );
 }
 
-// A heightfield cannot retain overhangs: a blast opens a crater to the sky.
-// Never add ground, and retain a thin bedrock layer so tanks stay in the world.
-export function carveCrater(terrain: number[], impact: Point): void {
-  const start = Math.max(0, Math.ceil(impact.x - BLAST_RADIUS));
-  const end = Math.min(terrain.length - 1, Math.floor(impact.x + BLAST_RADIUS));
-  const bedrockY = WORLD.height - TANK_RADIUS;
+export function surfaceAt(terrain: Terrain, x: number): number {
+  const column = clamp(Math.floor(x / CELL_SIZE), 0, GRID_WIDTH - 1);
 
-  for (let x = start; x <= end; x += 1) {
-    const horizontalDistance = x - impact.x;
-    const craterBottom = impact.y + Math.sqrt(BLAST_RADIUS ** 2 - horizontalDistance ** 2);
-
-    terrain[x] = Math.max(terrain[x], Math.min(bedrockY, craterBottom));
+  for (let row = 0; row < GRID_HEIGHT; row += 1) {
+    if (terrain.cells[row * GRID_WIDTH + column]) {
+      return row * CELL_SIZE;
+    }
   }
+
+  return GRID_HEIGHT * CELL_SIZE;
 }
 
-// Tanks settle instantly onto the highest support across their footprint.
-// They do not rise, slide sideways, or take falling damage in this version.
-export function settleTank(tank: Tank, terrain: number[]): void {
-  const start = Math.max(0, Math.floor(tank.x - TANK_RADIUS));
-  const end = Math.min(terrain.length - 1, Math.ceil(tank.x + TANK_RADIUS));
-  const supportY = Math.min(...terrain.slice(start, end + 1));
+export function carveCrater(terrain: Terrain, impact: Point): void {
+  terrain.cells.forEach((_, index) => {
+    const row = Math.floor(index / GRID_WIDTH);
+    const column = index % GRID_WIDTH;
+    const distance = Math.hypot(column * CELL_SIZE + 1 - impact.x, row * CELL_SIZE + 1 - impact.y);
+
+    if (distance <= BLAST_RADIUS) {
+      terrain.cells[index] = 0;
+    }
+  });
+
+  terrain.cells.fill(1, (GRID_HEIGHT - 1) * GRID_WIDTH);
+  detachEarth(terrain);
+  terrain.revision += 1;
+  terrain.materialSeconds = 0;
+  terrain.materialSpeed = 0;
+  terrain.materialDistance = 0;
+}
+
+// Spawn only: gameplay support removal must use swept tank dynamics.
+export function settleTank(tank: Tank, terrain: Terrain): void {
+  let supportY = GRID_HEIGHT * CELL_SIZE;
+
+  for (let x = tank.x - TANK_RADIUS; x <= tank.x + TANK_RADIUS; x += 1) {
+    supportY = Math.min(supportY, surfaceAt(terrain, x));
+  }
 
   tank.y = supportY - TANK_RADIUS;
+  tank.velocityY = 0;
+  tank.grounded = true;
 }

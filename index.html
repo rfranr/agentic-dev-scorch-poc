@@ -16,11 +16,12 @@
         <button id="restart" type="button">New match</button>
       </header>
       <p id="status" role="status" aria-live="polite" aria-label="Match status">Preparing the battlefield…</p>
+      <p id="health" aria-label="Tank health">P1: 100 HP · P2: 100 HP</p>
       <canvas
         id="battlefield"
         width="960"
         height="540"
-        aria-label="Artillery battlefield: Player 1 is blue on the left; Player 2 is orange on the right."
+        aria-label="Artillery battlefield: Player 1 is cyan on the left; Player 2 is coral on the right."
       >
         This game requires Canvas 2D support.
       </canvas>
@@ -42,9 +43,10 @@
       <details class="help">
         <summary>How to play</summary>
         <p>
-          Blue is Player 1; orange is Player 2. The ground ring marks the active tank. Adjust sliders with the mouse or
-          arrow keys, then press Fire. Angles above 90° fire backward. A nearby blast destroys a tank; craters remain
-          and tanks settle onto the ground. Each player keeps their aim. No wind. New match restarts at any time.
+          Cyan is Player 1; coral is Player 2. Labels show player and health; the ground ring marks the active tank.
+          Adjust sliders with the mouse or arrow keys, then press Fire. Angles above 90° fire backward. Nearby blasts
+          are lethal. Unsupported earth falls as rubble; tanks fall and lose health on hard landings. Wait for all
+          movement to settle before the next turn. Each player keeps their aim. No wind. New match restarts at any time.
         </p>
       </details>
       <noscript><p>Enable JavaScript to play Scorch.</p></noscript>

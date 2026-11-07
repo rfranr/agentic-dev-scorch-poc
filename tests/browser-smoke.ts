@@ -32,6 +32,7 @@ async function verifyWinningShot(page: Page): Promise<void> {
   assert.equal(await page.locator('#fire').isDisabled(), true);
   assert.equal(await page.locator('#angle').isDisabled(), true);
   assert.notEqual(await canvasImage(page), initialImage, 'projectile must be drawn');
+  await page.setViewportSize({ width: 390, height: 844 });
   await waitForPhase(page, 'finished');
   assert.equal(await page.getByRole('status', { name: 'Match status' }).textContent(), 'Player 1 wins!');
   assert.equal(await page.locator('#fire').isDisabled(), true);
@@ -68,8 +69,9 @@ async function verifyTurnsAndRestart(page: Page): Promise<void> {
 async function verifyResponsiveLayout(page: Page): Promise<void> {
   for (const viewport of [
     { width: 390, height: 844 },
+    { width: 844, height: 390 },
     { width: 1280, height: 720 },
-    { width: 1280, height: 900 },
+    { width: 1920, height: 1080 },
   ]) {
     await page.setViewportSize(viewport);
     const battlefield = await page.locator('#battlefield').boundingBox();
@@ -77,9 +79,23 @@ async function verifyResponsiveLayout(page: Page): Promise<void> {
 
     assert.ok(battlefield);
     assert.ok(fireButton);
-    assert.ok(battlefield.width >= 360);
+    assert.equal(battlefield.width, viewport.width);
+    assert.equal(battlefield.height, viewport.height);
+    assert.equal(battlefield.x, 0);
+    assert.equal(battlefield.y, 0);
+    await page.waitForFunction(() => {
+      const canvas = document.getElementById('battlefield') as HTMLCanvasElement;
+      const ratio = Math.min(window.devicePixelRatio, 2);
+
+      return (
+        canvas.width === Math.round(window.innerWidth * ratio) &&
+        canvas.height === Math.round(window.innerHeight * ratio)
+      );
+    });
+    assert.ok(fireButton.width >= 44 && fireButton.height >= 44);
     assert.ok(fireButton.y + fireButton.height < viewport.height, 'Fire stays in the initial viewport');
     assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth));
+    assert.ok(await page.evaluate(() => document.documentElement.scrollHeight <= window.innerHeight + 1));
     assert.equal(await page.locator('#power-value').innerText(), '69%');
   }
 }
@@ -99,7 +115,7 @@ async function verifyBrowser(context: TestContext, production: boolean): Promise
 
   context.after(() => browser.close());
 
-  const page = await browser.newPage();
+  const page = await browser.newPage({ deviceScaleFactor: 2 });
   const errors: string[] = [];
 
   page.on('pageerror', (error) => errors.push(error.message));
@@ -117,6 +133,10 @@ async function verifyBrowser(context: TestContext, production: boolean): Promise
   await waitForPhase(page, 'aiming');
   assert.equal(await page.title(), 'Scorch');
   await verifyResponsiveLayout(page);
+  await page.locator('summary').focus();
+  await page.keyboard.press('Enter');
+  assert.equal(await page.locator('details').getAttribute('open'), '');
+  await page.keyboard.press('Enter');
   await verifyWinningShot(page);
   await verifyTurnsAndRestart(page);
   assert.deepEqual(errors, []);

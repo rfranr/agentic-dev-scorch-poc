@@ -13,12 +13,19 @@ import {
   muzzle,
   type Game,
 } from '../src/simulation/model';
-import { carveCrater, generateTerrain, settleTank } from '../src/simulation/terrain';
+import {
+  carveCrater,
+  generateTerrain,
+  settleTank,
+  surfaceAt,
+  solidAt,
+  terrainFromSurface,
+} from '../src/simulation/terrain';
 
 function flatGame(): Game {
   const game = createGame(() => 0.5);
 
-  game.terrain.fill(400);
+  game.terrain = terrainFromSurface(() => 400);
 
   for (const tank of game.tanks) {
     settleTank(tank, game.terrain);
@@ -48,8 +55,8 @@ test('new match generates reproducible, uneven terrain with two supported tanks'
     game.terrain,
     generateTerrain(() => 0.25),
   );
-  assert.equal(game.terrain.length, WORLD.width);
-  assert.ok(new Set(game.terrain).size > 20);
+  assert.equal(game.terrain.cells.length, (WORLD.width * WORLD.height) / 4);
+  assert.ok(new Set(Array.from({ length: WORLD.width }, (_, x) => surfaceAt(game.terrain, x))).size > 20);
   assert.equal(game.activePlayer, 0);
   assert.equal(game.phase, 'aiming');
   assert.equal(game.tanks.length, 2);
@@ -57,7 +64,9 @@ test('new match generates reproducible, uneven terrain with two supported tanks'
 
   for (const tank of game.tanks) {
     const start = tank.x - TANK_RADIUS;
-    const support = Math.min(...game.terrain.slice(start, tank.x + TANK_RADIUS + 1));
+    const support = Math.min(
+      ...Array.from({ length: TANK_RADIUS * 2 + 1 }, (_, index) => surfaceAt(game.terrain, start + index)),
+    );
 
     assert.equal(tank.y + TANK_RADIUS, support);
     assert.equal(tank.alive, true);
@@ -157,7 +166,7 @@ test('swept collision catches a narrow terrain column', () => {
   const game = flatGame();
   const from = { x: 400, y: 300, velocityX: 1000, velocityY: 0 };
 
-  game.terrain[450] = 290;
+  game.terrain = terrainFromSurface((x) => (x === 450 ? 290 : 400));
   assert.equal(traceFlight(game, from, { ...from, x: 500 }).outcome, 'impact');
 });
 
@@ -169,32 +178,32 @@ test('world exits include side and bottom boundaries, while high arcs remain liv
 });
 
 test('crater removes ground inside the blast radius without changing distant columns', () => {
-  const terrain = Array<number>(WORLD.width).fill(400);
+  const terrain = terrainFromSurface(() => 400);
 
   carveCrater(terrain, { x: 400, y: 400 });
-  assert.equal(terrain[400], 400 + BLAST_RADIUS);
-  assert.equal(terrain[400 - BLAST_RADIUS - 1], 400);
-  assert.equal(terrain[400 + BLAST_RADIUS + 1], 400);
-  const firstCrater = terrain.slice();
+  assert.equal(surfaceAt(terrain, 400), 400 + BLAST_RADIUS);
+  assert.equal(surfaceAt(terrain, 400 - BLAST_RADIUS - 2), 400);
+  assert.equal(surfaceAt(terrain, 400 + BLAST_RADIUS + 2), 400);
+  const firstCrater = terrain.cells.slice();
 
   carveCrater(terrain, { x: 410, y: 390 });
   assert.ok(
-    terrain.every((surface, x) => surface >= firstCrater[x]),
+    terrain.cells.every((material, index) => !material || firstCrater[index] !== 0),
     'blasts never restore ground',
   );
 });
 
 test('craters at world edges stay finite and respect bedrock', () => {
-  const terrain = Array<number>(WORLD.width).fill(WORLD.height - 15);
+  const terrain = terrainFromSurface(() => WORLD.height - 15);
 
   carveCrater(terrain, { x: 0, y: WORLD.height - 10 });
   carveCrater(terrain, { x: WORLD.width - 1, y: WORLD.height - 10 });
-  assert.equal(terrain.length, WORLD.width);
-  assert.ok(terrain.every(Number.isFinite));
-  assert.ok(terrain.every((height) => height <= WORLD.height - TANK_RADIUS));
+  assert.equal(terrain.cells.length, (WORLD.width * WORLD.height) / 4);
+  assert.ok(terrain.cells.every(Number.isFinite));
+  assert.ok(Array.from({ length: WORLD.width }, (_, x) => solidAt(terrain, x, WORLD.height - 1)).every(Boolean));
 });
 
-test('tanks fall onto remaining support after ground is destroyed', () => {
+test('spawn placement finds remaining support without changing tank health', () => {
   const game = flatGame();
   const tank = game.tanks[0];
   const originalY = tank.y;
@@ -203,7 +212,7 @@ test('tanks fall onto remaining support after ground is destroyed', () => {
   settleTank(tank, game.terrain);
   assert.ok(tank.y > originalY);
   assert.ok(tank.y + TANK_RADIUS <= WORLD.height);
-  assert.equal(tank.y + TANK_RADIUS, game.terrain[tank.x - TANK_RADIUS]);
+  assert.equal(tank.y + TANK_RADIUS, surfaceAt(game.terrain, tank.x - TANK_RADIUS));
 });
 
 test('terrain impact persists, holds the turn during the explosion, then alternates once', () => {
@@ -212,22 +221,22 @@ test('terrain impact persists, holds the turn during the explosion, then alterna
   dropAt(game, 500);
   assert.equal(game.phase, 'exploding');
   assert.equal(game.projectile, null);
-  assert.ok(game.terrain[500] > 400);
+  assert.ok(surfaceAt(game.terrain, 500) > 400);
   assert.equal(game.activePlayer, 0);
   assert.equal(fire(game), false);
-  const changedTerrain = game.terrain.slice();
+  const changedTerrain = game.terrain.cells.slice();
 
   stepGame(game, EXPLOSION_SECONDS);
   assert.equal(game.phase, 'aiming');
   assert.equal(game.activePlayer, 1);
   stepGame(game, 1);
   assert.equal(game.activePlayer, 1);
-  assert.deepEqual(game.terrain, changedTerrain);
+  assert.deepEqual(game.terrain.cells, changedTerrain);
 });
 
 test('a missed shot changes turns without an explosion or terrain mutation', () => {
   const game = flatGame();
-  const original = game.terrain.slice();
+  const original = game.terrain.cells.slice();
 
   game.phase = 'flying';
   game.projectile = { x: WORLD.width - 1, y: 100, velocityX: 300, velocityY: 0 };
@@ -235,7 +244,7 @@ test('a missed shot changes turns without an explosion or terrain mutation', () 
   assert.equal(game.phase, 'aiming');
   assert.equal(game.activePlayer, 1);
   assert.equal(game.explosion, null);
-  assert.deepEqual(game.terrain, original);
+  assert.deepEqual(game.terrain.cells, original);
 });
 
 test('direct tank hit destroys the target, creates a crater, and ends the game', () => {
@@ -246,7 +255,7 @@ test('direct tank hit destroys the target, creates a crater, and ends the game',
   game.projectile = { x: target.x - 40, y: target.y, velocityX: 400, velocityY: 0 };
   resolveShot(game);
   assert.equal(target.alive, false);
-  assert.ok(game.terrain[target.x] > 400);
+  assert.ok(surfaceAt(game.terrain, target.x) > 400);
   assert.equal(game.phase, 'finished');
   assert.equal(game.winner, 0);
   assert.equal(game.activePlayer, 0);

@@ -79,6 +79,20 @@ test('impact guidance accounts for the firing direction of both players', () => 
   }
 });
 
+test('resolved feedback replaces impact guidance after delayed damage', () => {
+  const game = createGame(() => 0.5);
+  const presentation = createPresentation();
+
+  game.phase = 'exploding';
+  game.explosion = { x: 500, y: 400, ageSeconds: 0 };
+  updatePresentation(presentation, game);
+  game.phase = 'aiming';
+  game.explosion = null;
+  game.lastShot = 'Settled. P1: 80 HP; P2: 100 HP.';
+  updatePresentation(presentation, game);
+  assert.equal(presentation.outcome, game.lastShot);
+});
+
 test('destruction feedback takes precedence over range guidance and restart is isolated', () => {
   const game = createGame(() => 0.5);
   const presentation = createPresentation();
