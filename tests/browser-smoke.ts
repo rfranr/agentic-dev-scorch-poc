@@ -31,6 +31,7 @@ async function verifyWinningShot(page: Page): Promise<void> {
   await waitForPhase(page, 'flying');
   assert.equal(await page.locator('#fire').isDisabled(), true);
   assert.equal(await page.locator('#angle').isDisabled(), true);
+  assert.equal(await page.locator('#weapon').isDisabled(), true);
   assert.notEqual(await canvasImage(page), initialImage, 'projectile must be drawn');
   await page.setViewportSize({ width: 390, height: 844 });
   await waitForPhase(page, 'finished');
@@ -49,12 +50,16 @@ async function verifyTurnsAndRestart(page: Page): Promise<void> {
   assert.equal(await page.locator('#angle').inputValue(), '45');
   assert.equal(await page.locator('#power').inputValue(), '360');
   assert.notEqual(await canvasImage(page), endedImage);
+  assert.equal(await page.locator('#weapon').inputValue(), 'standard');
+  await page.locator('#weapon').selectOption('heavy');
+  assert.equal(await page.locator('#weapon').inputValue(), 'heavy');
   await setSlider(page, 'angle', 60);
   await setSlider(page, 'power', 180);
   await page.locator('#fire').click();
   await waitForPhase(page, 'flying');
   await waitForPhase(page, 'aiming');
   assert.match(await page.getByRole('status', { name: 'Match status' }).innerText(), /Player 2's turn/);
+  assert.equal(await page.locator('#weapon').inputValue(), 'standard');
   assert.equal(await page.locator('#angle').inputValue(), '45', 'player two keeps their own aim');
   await setSlider(page, 'angle', 70);
   await setSlider(page, 'power', 200);

@@ -32,6 +32,11 @@
       <form id="aim-form">
         <fieldset id="aim-controls">
           <legend>Aim the active tank</legend>
+          <label for="weapon">Weapon</label>
+          <select id="weapon">
+            <option value="standard">Standard</option>
+            <option value="heavy">Heavy</option>
+          </select>
           <label for="angle">Angle <output id="angle-value" for="angle">45°</output></label>
           <input id="angle" type="range" min="5" max="175" step="1" value="45" aria-describedby="aim-help" />
           <label for="power">Power <output id="power-value" for="power">69%</output></label>

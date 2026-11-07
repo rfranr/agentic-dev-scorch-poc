@@ -1,4 +1,4 @@
-import { createGame, fire, setAim, stepGame } from '../simulation/game';
+import { createGame, fire, selectWeapon, setAim, stepGame } from '../simulation/game';
 import { AIM_LIMITS, STEP_SECONDS, type Game } from '../simulation/model';
 import { renderGame } from './render';
 import { bindArcadeInput } from './input';
@@ -21,6 +21,7 @@ function readControls() {
     fieldset: element<HTMLFieldSetElement>('aim-controls'),
     angle: element<HTMLInputElement>('angle'),
     power: element<HTMLInputElement>('power'),
+    weapon: element<HTMLSelectElement>('weapon'),
     angleValue: element<HTMLOutputElement>('angle-value'),
     powerValue: element<HTMLOutputElement>('power-value'),
     status: element<HTMLParagraphElement>('status'),
@@ -52,6 +53,7 @@ function syncControls(controls: Controls, game: Game, outcome: string): void {
   controls.fieldset.disabled = game.phase !== 'aiming';
   controls.angle.value = String(tank.angle);
   controls.power.value = String(tank.power);
+  controls.weapon.value = game.selectedWeapon;
   controls.angleValue.value = `${Math.round(tank.angle)}°`;
   element('aim-readout').textContent =
     `Angle ${Math.round(tank.angle)}° · Power ${Math.round((tank.power / AIM_LIMITS.maxPower) * 100)}%`;
@@ -83,6 +85,9 @@ export function startGame(): void {
   let simulationFailed = false;
   const updateAim = () => setAim(game, Number(controls.angle.value), Number(controls.power.value));
 
+  controls.weapon.addEventListener('change', () => {
+    selectWeapon(game, controls.weapon.value === 'heavy' ? 'heavy' : 'standard');
+  });
   controls.angle.addEventListener('input', updateAim);
   controls.power.addEventListener('input', updateAim);
   controls.form.addEventListener('submit', (event) => {
@@ -133,7 +138,7 @@ export function startGame(): void {
     updatePresentation(presentation, game);
     const tank = game.tanks[game.activePlayer];
     const healthKey = game.tanks.map((player) => player.health).join('/');
-    const stateKey = `${game.phase}/${game.activePlayer}/${tank.angle}/${tank.power}/${presentation.outcome}/${healthKey}`;
+    const stateKey = `${game.phase}/${game.activePlayer}/${game.selectedWeapon}/${tank.angle}/${tank.power}/${presentation.outcome}/${healthKey}`;
 
     if (!simulationFailed && stateKey !== displayedState) {
       syncControls(controls, game, presentation.outcome);

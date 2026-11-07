@@ -1,3 +1,5 @@
+export type Weapon = 'standard' | 'heavy';
+
 export const WORLD = { width: 960, height: 540 };
 export const TANK_RADIUS = 12;
 export const BARREL_LENGTH = 25;
@@ -25,11 +27,13 @@ export interface Tank extends Point {
 }
 
 export interface Projectile extends Point {
+  weapon?: Weapon; // Omitted by legacy callers means Standard.
   velocityX: number;
   velocityY: number;
 }
 
 export interface Explosion extends Point {
+  weapon?: Weapon;
   ageSeconds: number;
 }
 
@@ -54,6 +58,7 @@ export interface Game {
   resolutionSeconds: number;
   tanks: Tank[];
   activePlayer: number;
+  selectedWeapon: Weapon; // Shared turn selection; reset to Standard on each turn.
   phase: 'aiming' | 'flying' | 'exploding' | 'finished';
   projectile: Projectile | null;
   explosion: Explosion | null;

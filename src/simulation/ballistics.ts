@@ -3,6 +3,7 @@ import { solidAt } from './terrain';
 
 export function moveProjectile(projectile: Projectile, seconds: number): Projectile {
   return {
+    ...projectile,
     x: projectile.x + projectile.velocityX * seconds,
     y: projectile.y + projectile.velocityY * seconds + (GRAVITY * seconds ** 2) / 2,
     velocityX: projectile.velocityX,

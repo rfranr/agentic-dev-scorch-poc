@@ -69,13 +69,13 @@ export function surfaceAt(terrain: Terrain, x: number): number {
   return GRID_HEIGHT * CELL_SIZE;
 }
 
-export function carveCrater(terrain: Terrain, impact: Point): void {
+export function carveCrater(terrain: Terrain, impact: Point, radius = BLAST_RADIUS): void {
   terrain.cells.forEach((_, index) => {
     const row = Math.floor(index / GRID_WIDTH);
     const column = index % GRID_WIDTH;
     const distance = Math.hypot(column * CELL_SIZE + 1 - impact.x, row * CELL_SIZE + 1 - impact.y);
 
-    if (distance <= BLAST_RADIUS) {
+    if (distance <= radius) {
       terrain.cells[index] = 0;
     }
   });

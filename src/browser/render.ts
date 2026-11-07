@@ -1,5 +1,5 @@
+import { weaponEffects } from '../simulation/weapons';
 import {
-  BLAST_RADIUS,
   CELL_SIZE,
   GRID_WIDTH,
   EXPLOSION_SECONDS,
@@ -168,7 +168,8 @@ function drawExplosion(context: CanvasRenderingContext2D, game: Game): void {
   const progress = Math.min(1, explosion.ageSeconds / EXPLOSION_SECONDS);
 
   const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const radius = reducedMotion ? BLAST_RADIUS : BLAST_RADIUS * (0.5 + progress * 0.5);
+  const blastRadius = weaponEffects(explosion.weapon).blastRadius;
+  const radius = reducedMotion ? blastRadius : blastRadius * (0.5 + progress * 0.5);
 
   context.fillStyle = `rgba(255, 183, 74, ${1 - progress})`;
   traceBlast(context, explosion, radius);

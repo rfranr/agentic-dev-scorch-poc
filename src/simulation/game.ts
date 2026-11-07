@@ -1,6 +1,5 @@
 import {
   AIM_LIMITS,
-  DAMAGE_RADIUS,
   EXPLOSION_SECONDS,
   TANK_RADIUS,
   WORLD,
@@ -14,6 +13,8 @@ import { moveProjectile, traceFlight } from './ballistics';
 import { carveCrater, generateTerrain, settleTank } from './terrain';
 import { stepMaterial, wakeMaterial } from './material';
 import { stepTank, walkTank } from './tank-physics';
+
+import { weaponEffects, type Weapon } from './weapons';
 
 const STABLE_INTERVAL_SECONDS = 0.2;
 const MAX_RESOLUTION_SECONDS = 10;
@@ -45,6 +46,7 @@ export function createGame(random: () => number = Math.random): Game {
     resolutionSeconds: 0,
     tanks,
     activePlayer: 0,
+    selectedWeapon: 'standard',
     phase: 'aiming',
     projectile: null,
     explosion: null,
@@ -64,6 +66,12 @@ export function setAim(game: Game, angle: number, power: number): void {
   tank.power = clamp(power, AIM_LIMITS.minPower, AIM_LIMITS.maxPower);
 }
 
+export function selectWeapon(game: Game, weapon: Weapon): void {
+  if (game.phase === 'aiming') {
+    game.selectedWeapon = weapon;
+  }
+}
+
 export function fire(game: Game): boolean {
   if (game.phase !== 'aiming') {
     return false;
@@ -75,6 +83,7 @@ export function fire(game: Game): boolean {
 
   game.projectile = {
     ...origin,
+    weapon: game.selectedWeapon,
     velocityX: Math.cos(radians) * tank.power * tank.direction,
     velocityY: -Math.sin(radians) * tank.power,
   };
@@ -98,24 +107,28 @@ function finishShot(game: Game): void {
   }
 
   game.activePlayer = 1 - game.activePlayer;
+  game.selectedWeapon = 'standard';
   game.phase = 'aiming';
 }
 
 function explode(game: Game, impact: Point): void {
+  const weapon = game.projectile?.weapon ?? 'standard';
+  const effects = weaponEffects(weapon);
+
   game.projectile = null;
-  game.explosion = { x: impact.x, y: impact.y, ageSeconds: 0 };
+  game.explosion = { x: impact.x, y: impact.y, ageSeconds: 0, weapon };
   game.phase = 'exploding';
   game.lastShot = 'Impact — waiting for terrain and tanks to settle.';
   game.stableSeconds = 0;
   game.resolutionSeconds = 0;
-  carveCrater(game.terrain, impact);
+  carveCrater(game.terrain, impact, effects.blastRadius);
 
   // Damage precedes settling: a tank cannot dodge the blast by falling.
   // Both tanks are checked, so self-destruction and a draw are possible.
   for (const tank of game.tanks) {
     const distance = Math.hypot(tank.x - impact.x, tank.y - impact.y);
 
-    tank.alive = tank.alive && distance > DAMAGE_RADIUS + TANK_RADIUS;
+    tank.alive = tank.alive && distance > effects.damageRadius + TANK_RADIUS;
 
     if (!tank.alive) {
       tank.health = 0;
