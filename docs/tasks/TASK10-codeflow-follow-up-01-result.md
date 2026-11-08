@@ -1,0 +1,7 @@
+# TASK10 follow-up 01 — Persist shot resolution flow
+
+- **Objective:** Preserve the validated TASK10 lifecycle as requested in `TASK10-codeflow-follow-up-01.md`.
+- **Changes:** Created [shot resolution architecture](../architecture/flows/shot-resolution.md) with a bounded Mermaid diagram, relationship legend, linked API inventory, existing comment/JSDoc coverage, implicit contracts and limitations. Added its link to [TASK10-result.md](TASK10-result.md). No production code or source comments changed.
+- **Verification:** Re-read current game orchestration, browser stepping/error handling, ballistics, crater bookkeeping, connectivity, material stepping and tank stepping; searched current source for input entry points, timing constants and JSDoc. Verified all 15 relative links in the architecture page using Python; checked balanced Mermaid fences. `git diff --check` exited successfully (new files are untracked, so this does not validate their contents). Reviewed the document for call/transition distinctions and explicit ordering. No new Joern run, Mermaid rendering, tests, build, formatting or quality reports executed for this documentation-only change. Cognitive complexity total/maximum and remaining lint violations were not measured; no metric changes claimed.
+- **Deviations:** None. Diagram rendering remains unverified; static source verification is not runtime validation.
+- **Outcome:** Completed.
