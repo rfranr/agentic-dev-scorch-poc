@@ -18,7 +18,8 @@
     "dependencies": "depcruise --config .dependency-cruiser.cjs -T err src/ tests/*.ts",
     "structure": "node scripts/run-structure.mjs",
     "check": "npm run lint && npm test && npm run build",
-    "check:report": "node scripts/check-report.mjs"
+    "check:report": "node scripts/check-report.mjs",
+    "poc:codeflow": "npx openflowkit map . --depth everything --html map-full.html"
   },
   "dependencies": {},
   "devDependencies": {
